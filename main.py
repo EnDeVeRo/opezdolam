@@ -2,9 +2,19 @@ import vk_api
 from dataclasses import dataclass
 from typing import Callable, Any
 from vk_api.longpoll import VkLongPoll, VkEventType
+import functools
 
 H_type = Callable[[str], Any]
 
+
+def user_repeat_non_stop(func):
+    @functools.wraps(func)
+    def wrapper(self):
+        while True:
+            try:
+                return func(self)
+            except Exception as error:
+                print(error)
 
 @dataclass
 class Handler:
@@ -43,45 +53,47 @@ class User:
     def put_message_handler(self, data):
         self.commands.append(data)
 
-    def comparison(self):
+    def it_im(self):
+        print(11111111111111111111)
+        if self.event.from_me == self.cmd.me:
+            return True
+        else: 
+            return False
 
-        def it_im(data):
-            if data.event.from_me == data.cmd.me:
-                return True
-            else: 
-                return False
+    def it_he(self):
+        if not self.event.from_me: return True
+        else: return False
+    @user_repeat_non_stop
+    def it_commands(self):
+        if self.event.text.split(" ")[1] in self.cmd.cmd: return True
+        else: return False
 
-        def it_he():
-            if not data.event.from_me: return True
-            else: return False
+    def it_trusted(self):
+        if self.event.user_id in self.trusted_list: return True
+        else: return False
+    @user_repeat_non_stop
 
-        def it_commands(data):
-            if data.event.text.split(" ")[1] in data.all_commands: return True
-            else: return False
+    def it_trigger(self):
+        if self.event.text.split(" ")[0] in self.trigger_list: return True
+        else: return False
 
-        def it_trusted(data):
-            if data.event.user_id in data.trusted_list: return True
-            else: return False
+    def it_ignore(self):
+        if self.event.user_id in self.ignore_list: return True
+        else: return False
 
-        def it_trigger(data):
-            if data.event.text.split(" ")[0] in data.trigger_list: return True
-            else: return False
+    @user_repeat_non_stop
+    def it_alias(self):
+        if self.event.text.split(" ")[0] in self.alias_list: return True
+        else: return False
 
-        def it_ignore(data):
-            if data.event.user_id in data.ignore_list: return True
-            else: return False
+    @user_repeat_non_stop
+    def get_prefix(self):
+        print(3333333)
+        if self.event.text.split(' ')[0] in self.cmd.prefix:
+            return True
+        else:
+            return False
 
-        def it_alias(data):
-            if data.event.text.split(" ")[0] in data.alias_list: return True
-            else: return False
-
-        def get_prefix(data):
-            if data.event.text.split(' ')[0] == data.cmd.prefix:
-                return True
-            else:
-                return False
-
-        return it_im
 
         #if self.event.text.split(" ")[0] == self.cmd.prefix and self.event.text.split(" ")[1] == self.cmd.cmd:
             #return True
@@ -94,15 +106,11 @@ class User:
                 self.event = event
                 for cmd in self.commands:
                     self.cmd = cmd
-                    print(self.cmd)
-                    if self.comparison():
-                        print(self.cmd.prefix)
-                        if self.event.text.split(" ")[0] in self.cmd.prefix and self.event.text.split(" ")[1] in self.cmd.cmd:
-                            print(self.comparison())
-                            cmd.func(self)
+                    if self.it_im() and self.get_prefix  and self.it_commands():
+                        cmd.func(self)
 
 
-dp = User("")
+dp = User("-PpJ4H1i5-v5phrLEbhGM74ImbISZBkA")
 
 
 from mod import datas
